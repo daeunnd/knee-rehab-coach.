@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TKA 무릎 ROM 재활 코칭</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        background: #f5f7fb;
+        font-family: Arial, "Malgun Gothic", sans-serif;
+        color: #1e293b;
+    }
+    .app {
+        max-width: 1180px;
+        margin: 24px auto;
+        padding: 22px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0,0,0,.08);
+    }
+    h1 { margin: 0 0 6px; font-size: 28px; }
+    .subtitle { margin: 0 0 20px; color: #64748b; font-size: 16px; }
+    .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.55fr) minmax(300px, .9fr);
+        gap: 20px;
+    }
+    .panel {
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 18px;
+        background: #fff;
+    }
+    .section-title {
+        font-size: 19px;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+    .side-row, .exercise-grid {
+        display: grid;
+        gap: 10px;
+    }
+    .side-row { grid-template-columns: 1fr 1fr; margin-bottom: 14px; }
+    .exercise-grid { grid-template-columns: repeat(2, 1fr); }
+    button {
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #334155;
+        border-radius: 12px;
+        padding: 13px 10px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+    button:hover { background: #eef2f7; }
+    button.active {
+        background: #2563eb;
+        color: white;
+        border-color: #2563eb;
+    }
+    .camera-wrap {
+        margin-top: 16px;
+        position: relative;
+        background: #0f172a;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    video { display: none; }
+    canvas { display: block; width: 100%; height: auto; }
+    .status {
+        margin-top: 14px;
+        padding: 15px;
+        border-radius: 12px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 16px;
+        line-height: 1.55;
+        font-weight: 600;
+    }
+    .guide {
+        position: sticky;
+        top: 15px;
+    }
+    .guide-card {
+        background: #f8fafc;
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 14px;
+    }
+    .guide-title {
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+    .guide-angle {
+        color: #2563eb;
+        font-size: 17px;
+        font-weight: 800;
+        margin-bottom: 10px;
+    }
+    .guide-text {
+        font-size: 16px;
+        line-height: 1.65;
+        margin: 0;
+    }
+    .illustration {
+        width: 100%;
+        height: 270px;
+        display: block;
+        background: white;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        position: relative;
+        clear: both;
+    }
+    .photo-credit {
+        font-size: 11px;
+        color: #64748b;
+        line-height: 1.4;
+        margin: -6px 0 10px;
+    }
+    .illustration img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        object-position: center;
+        background: #fff;
+    }
+    .guide-card > #photoCredit,
+    .guide-card > #guideTitle,
+    .guide-card > #guideAngle,
+    .guide-card > #guideText,
+    .guide-card > #targetBox {
+        display: block;
+        width: 100%;
+        clear: both;
+    }
+    .guide-text {
+        overflow-wrap: anywhere;
+        word-break: keep-all;
+    }
+    .target-box {
+        margin-top: 12px;
+        padding: 12px;
+        border-radius: 10px;
+        background: #eff6ff;
+        font-size: 15px;
+        line-height: 1.5;
+    }
+    .safety {
+        margin-top: 14px;
+        padding: 13px;
+        border-radius: 12px;
+        background: #fff7ed;
+        color: #9a3412;
+        font-size: 14px;
+        line-height: 1.55;
+    }
+    .reset {
+        margin-top: 12px;
+        width: 100%;
+        background: #f1f5f9;
+    }
+    .small {
+        color: #64748b;
+        font-size: 13px;
+        margin-top: 8px;
+    }
+    .font-size-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 0 0 16px;
+        padding: 12px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+    }
+    .font-size-box strong {
+        font-size: 16px;
+        margin-right: 4px;
+    }
+    .font-btn {
+        padding: 9px 14px;
+        font-size: 15px;
+        min-width: 70px;
+    }
+    .font-btn.active {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: white;
+    }
+    .font-large {
+        font-size: 19px !important;
+    }
+    .font-large h1 { font-size: 34px !important; }
+    .font-large .section-title { font-size: 23px !important; }
+    .font-large button { font-size: 19px !important; padding: 15px 12px !important; }
+    .font-large .status, .font-large .guide-text { font-size: 19px !important; }
+    .font-large .guide-title { font-size: 26px !important; }
+    .font-large .guide-angle { font-size: 20px !important; }
+    .font-large .target-box { font-size: 18px !important; }
+    .font-large .safety { font-size: 17px !important; }
+
+    .font-xlarge {
+        font-size: 22px !important;
+    }
+    .font-xlarge h1 { font-size: 40px !important; }
+    .font-xlarge .section-title { font-size: 27px !important; }
+    .font-xlarge button { font-size: 22px !important; padding: 18px 12px !important; }
+    .font-xlarge .status, .font-xlarge .guide-text { font-size: 22px !important; }
+    .font-xlarge .guide-title { font-size: 30px !important; }
+    .font-xlarge .guide-angle { font-size: 23px !important; }
+    .font-xlarge .target-box { font-size: 21px !important; }
+    .font-xlarge .safety { font-size: 20px !important; }
+
+    /* 카메라 화면의 무릎 위치 표시 */
+    .camera-wrap::after {
+        content: "";
+        position: absolute;
+        left: 14px;
+        bottom: 14px;
+        padding: 7px 10px;
+        border-radius: 8px;
+        background: rgba(15,23,42,.72);
+        color: #fff;
+        font-size: 12px;
+        pointer-events: none;
+    }
+
+    @media (max-width: 850px) {
+        .layout { grid-template-columns: 1fr; }
+        .guide { position: static; }
+    }
+</style>
+</head>
+<body>
+
+<div class="app">
+    <h1>🦵 무릎 인공관절 수술 후 재활 운동</h1>
+    <p class="subtitle">옆모습에서 엉덩이·무릎·발목을 인식하여 현재 무릎 각도를 실시간으로 표시합니다. <strong>머리가 화면 밖에 있어도 괜찮습니다.</strong> 상체부터 발끝까지, 선택한 다리의 엉덩이·무릎·발목이 보이도록 해주세요.</p>
+
+    <div class="font-size-box">
+        <strong>글자 크기</strong>
+        <button class="font-btn active" data-font="normal">기본</button>
+        <button class="font-btn" data-font="large">크게</button>
+        <button class="font-btn" data-font="xlarge">아주 크게</button>
+    </div>
+
+    <div class="layout">
+        <div class="panel">
+            <div class="section-title">① 운동할 다리 선택</div>
+            <div class="side-row">
+                <button id="leftBtn" class="active">왼쪽 무릎</button>
+                <button id="rightBtn">오른쪽 무릎</button>
+            </div>
+
+            <div class="section-title">② 운동 선택</div>
+            <div class="exercise-grid">
+                <button data-exercise="flexion" class="exercise active">무릎 굴곡</button>
+                <button data-exercise="extension" class="exercise">무릎 신전</button>
+                <button data-exercise="heelSlide" class="exercise">발뒤꿈치 끌기</button>
+                <button data-exercise="quadSet" class="exercise">허벅지 앞쪽 힘주기</button>
+                <button data-exercise="activeROM" class="exercise">무릎 스스로 굽혔다 펴기</button>
+            </div>
+
+            <div class="camera-wrap">
+                <video id="video" autoplay playsinline></video>
+                <canvas id="canvas" width="720" height="540"></canvas>
+            </div>
+
+            <div id="status" class="status">
+                카메라 연결 중입니다. 선택한 다리가 잘 보이도록 위치를 조정해주세요.
+            </div>
+
+            <button id="resetBtn" class="reset">측정 기록 초기화</button>
+            <div class="small">※ 카메라 측정값은 교육·운동 보조용이며 의료진의 ROM 평가를 대신하지 않습니다.</div>
+        </div>
+
+        <div class="panel guide">
+            <div class="section-title">③ 운동 방법</div>
+            <div class="guide-card">
+                <div id="illustration" class="illustration"></div>
+                <div id="photoCredit" class="photo-credit"></div>
+                <div id="guideTitle" class="guide-title">무릎 굴곡</div>
+                <div id="guideAngle" class="guide-angle">목표: 초기 90° → 점차 100~120° 이상</div>
+                <p id="guideText" class="guide-text">
+                    누운 자세에서 발뒤꿈치를 엉덩이 쪽으로 천천히 당겨 무릎을 굽힙니다.
+                </p>
+                <div id="targetBox" class="target-box">
+                    현재 목표: <strong>90°</strong><br>
+                    현재 각도: <strong id="currentAngleText">-</strong>
+                </div>
+            </div>
+
+            <div class="safety">
+                <strong>⚠️ 안전하게 운동하기</strong><br>
+                통증이 심해지거나 어지러움이 있으면 운동을 중단하세요.
+                고령 환자는 반드시 튼튼한 의자를 잡고 시행하며, 균형이 불안정하면 보호자 또는 의료진의 도움을 받으세요.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+
+<script>
+(function () {
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const status = document.getElementById("status");
+    const guideTitle = document.getElementById("guideTitle");
+    const guideAngle = document.getElementById("guideAngle");
+    const guideText = document.getElementById("guideText");
+    const targetBox = document.getElementById("targetBox");
+    const illustration = document.getElementById("illustration");
+
+    let selectedSide = "left";
+    let currentExercise = "flexion";
+    let maxAngle = 0;
+    let lastValidPose = null;
+    let invalidPoseFrames = 0;
+
+    const exerciseInfo = {
+        flexion: {
+            title: "무릎 굴곡",
+            angle: "목표: 초기 90° → 점차 100~120° 이상",
+            text: "튼튼한 의자를 잡고 선 자세에서 발뒤꿈치를 엉덩이 쪽으로 천천히 들어 올려 무릎을 굽힙니다.",
+            target: 90,
+            photo: "https://image.pim.regionh.dk/images/PROD/www.bispebjerghospital.dk/8639/KH_05.png",
+            credit: "실제 사진 예시 · Region Hovedstaden"
+        },
+        extension: {
+            title: "무릎 신전",
+            angle: "목표: 0°",
+            text: "의자나 튼튼한 지지대를 잡고 선 자세에서 무릎을 살짝 굽혔다가 허벅지 앞쪽에 힘을 주어 천천히 폅니다.",
+            target: 0,
+            photo: "https://www.adamkempfitness.com/wp-content/uploads/2025/03/TKE-Exercise.jpg",
+            credit: "실제 사진 예시 · Terminal Knee Extension 운동"
+        },
+        heelSlide: {
+            title: "발뒤꿈치 끌기",
+            angle: "목표: 굴곡 90° 이상",
+            text: "이 운동은 일반적으로 누운 자세에서 시행합니다. 발뒤꿈치를 엉덩이 쪽으로 천천히 끌어 무릎을 굽혔다가 폅니다.",
+            target: 90,
+            photo: "https://mydoctor.kaiserpermanente.org/ncal/Images/thumbnail_large_Orthopedics%20-%20Heel%20Slides%20-%20Illustration_tcm75-849518.jpg",
+            credit: "실제 운동 예시 · Kaiser Permanente"
+        },
+        quadSet: {
+            title: "허벅지 앞쪽 힘주기",
+            angle: "목표: 완전 신전",
+            text: "이 운동은 일반적으로 누운 자세에서 시행합니다. 다리를 편 상태에서 허벅지 앞쪽에 힘을 주고 무릎 뒤쪽을 바닥으로 눌러줍니다.",
+            target: 0,
+            photo: "https://twnlivestorage1.blob.core.windows.net/twn-media-public/VER75436A/VER75436A_g00.jpg",
+            credit: "실제 운동 예시 · Quad Set"
+        },
+        activeROM: {
+            title: "무릎 스스로 굽혔다 펴기",
+            angle: "목표: 굴곡 90~120°",
+            text: "의자에 앉아 다리를 천천히 굽혔다가 펴면서 무릎이 움직이는 범위를 확인합니다.",
+            target: 90,
+            photo: "https://image.pim.regionh.dk/images/PROD/www.hvidovrehospital.dk/9524/Kn%C3%A6protese%204%20-%20Fysio-%20og%20Ergoterapien%20%28HVH%29.jpg",
+            credit: "실제 운동 예시 · Hvidovre Hospital"
+        }
+    };
+
+    function kneeAngle(hip, knee, ankle) {
+        const a = Math.atan2(hip.y - knee.y, hip.x - knee.x);
+        const b = Math.atan2(ankle.y - knee.y, ankle.x - knee.x);
+        let angle = Math.abs((a - b) * 180 / Math.PI);
+        if (angle > 180) angle = 360 - angle;
+        return angle;
+    }
+
+    function extensionDeficit(rawAngle) {
+        return Math.max(0, 180 - rawAngle);
+    }
+
+    function setGuide() {
+        const info = exerciseInfo[currentExercise];
+        guideTitle.textContent = info.title;
+        guideAngle.textContent = info.angle;
+        guideText.textContent = info.text;
+
+        if (currentExercise === "flexion" || currentExercise === "heelSlide" ||
+            currentExercise === "activeROM") {
+            targetBox.innerHTML = `현재 목표: <strong>${info.target}° 이상</strong><br>
+                                   현재 각도: <strong id="currentAngleText">-</strong>`;
+        } else {
+            targetBox.innerHTML = `현재 목표: <strong>0°</strong><br>
+                                   현재 신전 부족 각도: <strong id="currentAngleText">-</strong>`;
+        }
+        maxAngle = 0;
+        drawIllustration(info.type);
+        document.getElementById("currentAngleText").textContent = "-";
+    }
+
+    function drawIllustration(type) {
+        const info = exerciseInfo[currentExercise];
+        const photoCredit = document.getElementById("photoCredit");
+
+        illustration.innerHTML = `
+            <img class="exercise-photo" src="${info.photo}"
+                 alt="${info.title} 운동 사진"
+                 onerror="this.onerror=null; this.style.display='none';">
+        `;
+        photoCredit.textContent = info.credit || "";
+    }
+
+    document.getElementById("leftBtn").addEventListener("click", function () {
+        selectedSide = "left";
+        this.classList.add("active");
+        document.getElementById("rightBtn").classList.remove("active");
+        maxAngle = 0;
+        lastValidPose = null;
+        invalidPoseFrames = 0;
+    });
+
+    document.getElementById("rightBtn").addEventListener("click", function () {
+        selectedSide = "right";
+        this.classList.add("active");
+        document.getElementById("leftBtn").classList.remove("active");
+        maxAngle = 0;
+        lastValidPose = null;
+        invalidPoseFrames = 0;
+    });
+
+    document.querySelectorAll(".exercise").forEach(btn => {
+        btn.addEventListener("click", function () {
+            document.querySelectorAll(".exercise").forEach(b => b.classList.remove("active"));
+            this.classList.add("active");
+            currentExercise = this.dataset.exercise;
+            setGuide();
+        });
+    });
+
+    document.getElementById("resetBtn").addEventListener("click", function () {
+        maxAngle = 0;
+        document.getElementById("currentAngleText").textContent = "-";
+        status.innerHTML = "측정 기록을 초기화했습니다.";
+    });
+
+    function validateKneePose(hip, knee, ankle, exercise) {
+        // 머리나 어깨는 전혀 필요하지 않습니다.
+        // 정면/측면 모두에서 "엉덩이-무릎-발목"이 실제 다리처럼 연결될 때만 측정합니다.
+        const score = p => Math.max(p?.visibility ?? 0, p?.presence ?? 0);
+        const dist = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
+
+        // 상체가 잘려 있어도 되도록 어깨 조건은 사용하지 않습니다.
+        if (score(hip) < 0.28 || score(knee) < 0.30 || score(ankle) < 0.28) return false;
+
+        const hk = dist(hip, knee);
+        const ka = dist(knee, ankle);
+
+        // 손/팔 같은 작은 오인식은 다리 길이 조건에서 제외합니다.
+        if (hk < 0.06 || ka < 0.06 || hk > 0.90 || ka > 0.90) return false;
+        const ratio = hk / Math.max(ka, 0.001);
+        if (ratio < 0.25 || ratio > 3.50) return false;
+        if (hk + ka < 0.16) return false;
+
+        // 정면에서는 x좌표가 거의 일직선이어도 정상입니다.
+        // 측면에서는 y좌표가 위→아래로 이어지는지 확인하되 기준을 넓게 잡습니다.
+        const isSupine = exercise === "heelSlide" || exercise === "quadSet";
+        if (!isSupine) {
+            if (knee.y < hip.y - 0.14) return false;
+            if (ankle.y < knee.y - 0.14) return false;
+        }
+
+        // 선택한 다리의 세 관절이 화면 안에 충분히 들어와야 합니다.
+        for (const p of [hip, knee, ankle]) {
+            if (p.x < 0.015 || p.x > 0.985 || p.y < 0.015 || p.y > 0.985) return false;
+        }
+
+        // 프레임 사이의 갑작스러운 이동만 차단합니다.
+        if (lastValidPose) {
+            const jump = Math.max(
+                dist(hip,lastValidPose.hip),
+                dist(knee,lastValidPose.knee),
+                dist(ankle,lastValidPose.ankle)
+            );
+            if (jump > 0.35) return false;
+        }
+        return true;
+    }
+
+    function onResults(results) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+
+        // 카메라는 거울모드로 표시합니다.
+        // 단, 아래의 각도 숫자/한글은 별도로 그려서 글자가 좌우반전되지 않게 합니다.
+        if (results.image) {
+            ctx.save();
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
+        }
+
+        if (!results.poseLandmarks) {
+            ctx.restore();
+            status.textContent = "상체 일부부터 무릎·발목까지 화면에 보이도록 위치를 조정해주세요.";
+            return;
+        }
+
+        const lm = results.poseLandmarks;
+        // validateKneePose에서 어깨까지 함께 확인할 수 있도록 현재 랜드마크를 저장합니다.
+        window.__lastLandmarks = lm;
+        const side = selectedSide === "left";
+
+        const hip = lm[side ? 23 : 24];
+        const knee = lm[side ? 25 : 26];
+        const ankle = lm[side ? 27 : 28];
+
+        // 머리/얼굴 랜드마크는 사용하지 않습니다.
+        // 상체가 화면 위쪽에서 잘려도 엉덩이·무릎·발목만 보이면 측정합니다.
+        if (!hip || !knee || !ankle || !validateKneePose(hip, knee, ankle, currentExercise)) {
+            invalidPoseFrames++;
+            ctx.restore();
+            status.innerHTML = "📷 <strong>무릎을 찾는 중입니다.</strong><br>머리는 필요하지 않습니다. <strong>상체 일부와 엉덩이·무릎·발목</strong>이 화면에 함께 보이면 됩니다.<br>정면에서도 가능하며, 선택한 무릎이 다른 다리에 가리지 않게 살짝 벌려주세요.";
+            return;
+        }
+
+        invalidPoseFrames = 0;
+        lastValidPose = { hip, knee, ankle };
+
+        const raw = kneeAngle(hip, knee, ankle);
+        let measured;
+
+        // 무릎 굴곡은 180°에서 얼마나 굽혀졌는지를 표시
+        // 예: 완전히 편 상태 약 180° → 굴곡 0°, 90° 굽힘 → 약 90°
+        measured = extensionDeficit(raw);
+
+        if (measured > maxAngle) maxAngle = measured;
+
+        const info = exerciseInfo[currentExercise];
+        let success = false;
+
+        if (currentExercise === "extension" || currentExercise === "quadSet") {
+            success = measured <= 5;
+        } else {
+            success = measured >= info.target;
+        }
+
+        // 관절선 표시
+        // 거울모드 화면의 관절 위치와 일치하도록 표시합니다.
+        // 거울모드 카메라에 맞춰 관절의 X좌표만 좌우 반전합니다.
+        // Y좌표와 실제 측정 각도는 그대로 유지합니다.
+        const hx = (1 - hip.x) * canvas.width;
+        const hy = hip.y * canvas.height;
+        const kx = (1 - knee.x) * canvas.width;
+        const ky = knee.y * canvas.height;
+        const ax = (1 - ankle.x) * canvas.width;
+        const ay = ankle.y * canvas.height;
+
+        // 엉덩이-무릎-발목을 선으로 연결
+        ctx.strokeStyle = success ? "#22c55e" : "#38bdf8";
+        ctx.lineWidth = 6;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(hx, hy);
+        ctx.lineTo(kx, ky);
+        ctx.lineTo(ax, ay);
+        ctx.stroke();
+
+        // 세 관절 위치 표시: 무릎은 크게 강조
+        function jointDot(x, y, radius, fill) {
+            ctx.beginPath();
+            ctx.fillStyle = fill;
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 3;
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        jointDot(hx, hy, 9, "#38bdf8");
+        jointDot(ax, ay, 9, "#38bdf8");
+        jointDot(kx, ky, 19, success ? "#22c55e" : "#f59e0b");
+
+        // 무릎 중앙에 십자 표시
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(kx - 8, ky); ctx.lineTo(kx + 8, ky);
+        ctx.moveTo(kx, ky - 8); ctx.lineTo(kx, ky + 8);
+        ctx.stroke();
+
+        // 무릎 옆에 현재 각도 표시
+        ctx.fillStyle = "rgba(15,23,42,.88)";
+        ctx.beginPath();
+        ctx.roundRect(kx + 18, ky - 28, 92, 42, 10);
+        ctx.fill();
+        ctx.font = "bold 19px Arial";
+        ctx.fillStyle = success ? "#4ade80" : "#ffffff";
+        ctx.fillText(`${Math.round(measured)}°`, kx + 33, ky + 1);
+
+        ctx.restore();
+
+        // 측정값 표시
+        ctx.save();
+        ctx.fillStyle = "rgba(15,23,42,.90)";
+        ctx.fillRect(16, 16, 365, 132);
+
+        ctx.font = "bold 16px Arial";
+        ctx.fillStyle = "#f9a8d4";
+        ctx.fillText(`● 무릎 ROM 코칭 (${side ? "왼쪽" : "오른쪽"})`, 28, 43);
+
+        ctx.font = "bold 24px Arial";
+        ctx.fillStyle = success ? "#4ade80" : "#ffffff";
+        ctx.fillText(`현재 각도: ${Math.round(measured)}°`, 28, 78);
+
+        ctx.font = "15px Arial";
+        ctx.fillStyle = "#cbd5e1";
+        if (currentExercise === "extension" || currentExercise === "quadSet") {
+            ctx.fillText(`목표: 0° / 신전 부족: ${Math.round(measured)}°`, 28, 108);
+        } else {
+            ctx.fillText(`목표: ${info.target}° 이상 / 최대 기록: ${Math.round(maxAngle)}°`, 28, 108);
+        }
+        ctx.restore();
+
+        document.getElementById("currentAngleText").textContent = Math.round(measured) + "°";
+
+        if (success) {
+            status.style.background = "#dcfce7";
+            status.style.color = "#15803d";
+            if (currentExercise === "extension" || currentExercise === "quadSet") {
+                status.innerHTML = "✅ <strong>좋아요!</strong> 무릎이 거의 완전히 펴졌습니다.";
+            } else {
+                status.innerHTML = `✅ <strong>좋아요!</strong> 목표 ${info.target}°에 도달했습니다. 천천히 동작을 유지하세요.`;
+            }
+        } else {
+            status.style.background = "#eff6ff";
+            status.style.color = "#1d4ed8";
+            if (currentExercise === "extension" || currentExercise === "quadSet") {
+                status.innerHTML = "💪 무릎을 편하게 펴주세요. 통증이 있으면 무리하지 마세요.";
+            } else {
+                status.innerHTML = `💪 천천히 무릎을 더 굽혀 목표 ${info.target}°에 가까워지도록 해보세요.`;
+            }
+        }
+    }
+
+    function startCamera() {
+        if (typeof Pose === "undefined" || typeof Camera === "undefined") {
+            setTimeout(startCamera, 300);
+            return;
+        }
+
+        const pose = new Pose({
+            locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+        });
+
+        pose.setOptions({
+            modelComplexity: 1,
+            smoothLandmarks: true,
+            minDetectionConfidence: 0.40,
+            minTrackingConfidence: 0.40
+        });
+
+        pose.onResults(onResults);
+
+        const camera = new Camera(video, {
+            onFrame: async () => {
+                await pose.send({ image: video });
+            },
+            width: 720,
+            height: 540
+        });
+
+        camera.start()
+            .then(() => {
+                status.textContent = "카메라 연결 완료! 오른쪽의 운동 방법과 사진을 확인하고 시작해주세요.";
+            })
+            .catch(err => {
+                status.innerHTML = "<strong>카메라 연결 실패</strong><br>카메라 권한을 허용한 뒤 페이지를 새로고침해주세요.";
+                console.error(err);
+            });
+    }
+
+
+    document.querySelectorAll(".font-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const root = document.querySelector(".app");
+            root.classList.remove("font-large", "font-xlarge");
+            document.querySelectorAll(".font-btn").forEach(b => b.classList.remove("active"));
+
+            const size = this.dataset.font;
+            if (size === "large") root.classList.add("font-large");
+            if (size === "xlarge") root.classList.add("font-xlarge");
+
+            this.classList.add("active");
+        });
+    });
+
+    setGuide();
+    startCamera();
+})();
+</script>
+</body>
+</html>
